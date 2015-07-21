@@ -106,6 +106,13 @@ in the future we might need multiple Jenkins servers.
 Initially the server provoding the r-hub API is very simple, and
 will serve as a proxy to Jenkins.
 
+[1] https://jenkins-ci.org__
+[2] https://github.com/progrium/dokku
+
+[3] https://github.com/googlecloudplatform/kubernetes
+
+[4] https://coreos.com/
+
 ### r-hub API (weeks 1-2)
 
 ### Jenkins Linux workers (weeks 2-3)
@@ -134,7 +141,4 @@ will serve as a proxy to Jenkins.
 
 ### Specialized builds (valgrind, ASAN, UB-SAN, etc.) (week 20)
 
-[1] https://jenkins-ci.org
-[2] https://github.com/progrium/dokku
-[3] https://github.com/googlecloudplatform/kubernetes
-[4] https://coreos.com/
+## Costs
