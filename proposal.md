@@ -34,20 +34,20 @@ community contributions to r-hub itself.
 2. Keep compatibility with current systems.
 3. Cover as much of the user base as possible.
 4. Create open systems: provide APIs, open source all code for the service,
-   accept contributions to it.
+   accept contributions to it.  Make all software open source on GitHub.
+   GitHub can be used with and svn natively, and also with Mercurial
+   with a plugin.
 5. Automated system. Make the daily operation of r-hub fully automatic,
    without any human intervention needed.
 6. Cost-effective services. Rent machines from the cloud, if possible.
    Adapt number and type of machines to the current workload.
 7. Make it possible for organizations and individuals to contribute (the
    cost of) machines to the build farm.
-8. Make all software open source on GitHub. GitHub can be used with
-   and svn natively, and also with Marcurial with a plugin.
-9. Make services reproducible.  It should be possible to start up an
-   instance of any r-hub service within a few hours, for anyone, even
+8. Make services reproducible.  It should be possible to start up an
+   instance of any r-hub service within minutes, for anyone, even
    on their own laptop. This is crucial for development, testing and
    user contribution.
-10. Separation is key, so use containers and reproducible VM images as much
+9. Separation is key, so use containers and reproducible VM images as much
    as possible.
 
 ## Essential services
