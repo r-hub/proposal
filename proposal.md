@@ -97,8 +97,8 @@ statistics, link to GitHub issues.
 master server to start with. We will run it in the cloud, initially on
 DigitalOcean. We will use [dokku][dokku] to manage it (and also other
 microservices in containers). We will probably switch to something more
-integrated in the future, like Kubernetes [kubernetes] on CoreOS [coreos],
-but initially dokku will be enough.
+integrated in the future, like [Kubernetes][kubernetes] on
+[CoreOS][coreos], but initially dokku will be enough.
 
 We will not expose Jenkins directly to the users, but both users and admins
 will access it through an HTTP API (the r-hub API). The reason for this is
