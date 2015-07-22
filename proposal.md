@@ -166,11 +166,19 @@ will be two backends: local, DigitalOcean or AWS.
 
 The local backend is for development and testing, it creates a
 worker on the local machine. DigitalOcean has an API to create a droplet
-with Docker support, AWS has one as well, obviously.
+with Docker support, AWS has an API as well.
 
 The DigitalOcean/AWS worker is mainly for production (but can be used for
 testing). Jenkins has a Docker plugin that can create the container, once
 a Docker environment is set up.
+
+Each platform needs to be able to install a recent version of
+R-devel. For the Linux workers, a permanent Jenkins job will build
+R-devel daily, in a seperate container, and then distributes the
+(successful) build via HTTP. The worker containers download the binary
+R-devel versions upon startup, and they also check if they have the most
+recent version at the beginning of each build. This is a simple and cheap
+HTTP HEAD query.
 
 ### System requirements (week 3)
 
@@ -241,6 +249,9 @@ Alternatively, we can also run windows on AWS. If the Linux deployment
 will be on AWS, then it makes sense to use AWS workers for Windows as
 well.
 
+For windows, a daily build of R-devel is available from r-project.org and
+the windows workers just download this.
+
 New repositories:
 
 * `rhub-backend-azure` The Azure backend.
@@ -251,7 +262,11 @@ New repositories:
 
 ### On-demand workers (week 9)
 
+
 ### OSX slaves (weeks 10-11)
+
+For OSX, a daily build of R-devel is available from r-project.org and the
+workers just download this.
 
 ### CRAN presubmission (week 12)
 
