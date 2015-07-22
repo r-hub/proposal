@@ -173,14 +173,30 @@ testing). Jenkins has a Docker plugin that can create the container, once
 a Docker environment is set up.
 
 Each platform needs to be able to install a recent version of
-R-devel. For the Linux workers, a permanent Jenkins job will build
-R-devel daily, in a seperate container, and then distributes the
+R-devel (and R-patched). For the Linux workers, a permanent Jenkins job
+will build R-devel daily, in a seperate container, and then distributes the
 (successful) build via HTTP. The worker containers download the binary
 R-devel versions upon startup, and they also check if they have the most
 recent version at the beginning of each build. This is a simple and cheap
 HTTP HEAD query.
 
-### System requirements (week 3)
+Current Linux platforms on CRAN:
+
+- `r-devel-linux-x86_64-debian-clang` (Debian testing)
+- `r-devel-linux-x86_64-debian-gcc` (Debian testing)
+- `r-devel-linux-x86_64-fedora-clang` (Fedora 21)
+- `r-devel-linux-x86_64-fedora-gcc` (Fedora 21)
+- `r-patched-linux-x86_64` (Debian testing)
+- `r-release-linux-x86_64` (Debian testing)
+
+Other popular Linux platforms we want to support:
+
+- `r-devel` on most recent Ubuntu LTS
+- `r-release` on most recent Ubuntu LTS
+- `r-devel` on stable Debian
+- `r-release` on stable Debian
+
+### System requirements (week 4)
 
 Create a database of system requirements, in the spirit of
 https://github.com/metacran/sysreqs The workers need to use this
@@ -191,6 +207,7 @@ Repositories needed so far:
 * `rhub-jenkins` The Docker config for our Jenkins instance. It
     contains the Jenkins config as well.
 * `rhub-app` The web app to submit and query jobs, in node.js.
+- `rhub-api` Web pages that document the API.
 * `rhub-queue` The app that handles the queue, picks up the files,
     creates Jenkins jobs, and starts the build.
 * `rhub-worker-*` One repo for the Docker config for each worker type.
@@ -200,17 +217,21 @@ Repositories needed so far:
     probably, so that the app can easily use it.
 * `rhub-backend-do` DigitalOcean backend to create/destroy workers on DO.
 * `rhub-backend-aws` Backend to create/destroy workers on AWS.
-* `rhub-issues` A repository for user feedback.
 * `sysreqs` Database of system requirement mappings.
 * `sysreqs-app` Web app with an API for system requirements.
+* `rhub-issues` A repository for user feedback.
 
-### Online submission system (week 4)
+### Online submission system (week 5)
 
-Orchestrate, document, test and make public the web app for submitting
-builds for Linux machines. At this point, we have the Linux-builder
-equivalent of Win-builder, as an open, extensible system.
+Test the Linux builders and the system requirements by building
+all CRAN packages (that are available on Linux). Fix errors, 99%
+of the CRAN packages are expected to build correctly.
 
-### Redundant services, logging and monitoring (weeks 5-6)
+In general, orchestrate, document, test and make public the web app for
+submitting builds for Linux machines. At this point, we have the
+Linux-builder equivalent of Win-builder, as an open, extensible system.
+
+### Redundant services, logging and monitoring (weeks 6-7)
 
 For logging, redirect all logs through the network to a single log
 server. These logs do not include console output from builds, those
@@ -233,7 +254,7 @@ New repositories:
 * `rhub-logger` Config for running the logger.
 * `rhub-dashboard` Web-app to view the actual monitoring dashboard.
 
-### Windows workers (weeks 7-8)
+### Windows workers (weeks 8-9)
 
 Jenkins also has an [Azure plugin][jenkins-azure]. We can maybe use that,
 if creating the workers through Jenkins is OK. More likely, we can just
@@ -252,6 +273,9 @@ well.
 For windows, a daily build of R-devel is available from r-project.org and
 the windows workers just download this.
 
+We will use code fromt the [r-appveyor][r-appveyor] project to build the
+windows worker backend.
+
 New repositories:
 
 * `rhub-backend-azure` The Azure backend.
@@ -259,27 +283,97 @@ New repositories:
 
 [jenkins-azure]: https://github.com/jenkinsci/azure-slave-plugin
 [node-azure]: https://www.npmjs.com/package/azure
-
-### On-demand workers (week 9)
-
+[r-appveyor]: https://github.com/krlmlr/r-appveyor
 
 ### OSX slaves (weeks 10-11)
 
+For legal reasons, OSX workers need to run on Apple hardware. Many
+companies offer OSX as IaaS, and this seems to be the simplest and cheapest
+solution for us. Most likely we will rent a Mac Mini server with 16GB
+memory from https://macstadium.com, unless we get a better offer. This
+server comes with a VMware ESXi v6.0 Hypervisor, so we run multiple
+instances of OSX on it, in virtual machines. We create snapshot images for
+the latest two or three OSX versions, and we start each R package build
+from a snapshot image, assuming that startup takes a reasonable time
+(1-2 minutes maximum). If it takes longer, then we will look into running
+the build as a restricted user, clean up after the build, reuse the VM
+for multiple builds, and only reboot/recreate the VM once a day.
+
+Jenkins supports ESXi via a plugin, or we can just use the native ESXi API
+directly from our web-app middleware, to manage the VMs.
+
 For OSX, a daily build of R-devel is available from r-project.org and the
-workers just download this.
+workers just download this and install it to a read-only shared area,
+so that the worker images do not need to be rebuilt daily.
 
-### CRAN presubmission (week 12)
+New repositories:
 
-### CI for GitHub projects (weeks 13-14)
+* `rhub-backend-osx`
 
-### Open, documented API (week 15)
+### On-demand workers (week 12)
 
-### Community website (weeks 16-17)
+While we strive to have a quick build startup time, we want to make
+sure that workers are not idle for long. For OSX at https://macstadium.com,
+flexible scaling is not available for the rented Mac Mini servers.
+For Linux and Windows workers, they are typically billed by the hour.
+We will work out a simple heuristics to shut down idle Windows and Linux
+workers. This could work from within Jenkins or the r-hub application,
+probably the latter, as we also want to remove the machines from Jenkins.
 
-### Reverse dependency checks (week 18)
+### CRAN presubmission (week 13)
 
-### Solaris builds (week 19)
+Work with CRAN on the integration of r-hub into the CRAN submission
+process. At present, 80% of the CRAN submissions are turned down. We
+set out to reduce this to 20%, by providing feedback to package developers,
+prior to submitting to CRAN.
 
-### Specialized builds (valgrind, ASAN, UB-SAN, etc.) (week 20)
+The CRAN submission process will have the following steps:
+- User submits through web-app on r-hub.
+- Package is built and checked on Linux with r-devel.
+  If there are warnings or errors, the submission is rejected.
+- Package is built and checked by r-hub, on all CRAN platforms. If there
+  are warnings or errors, the package is rejected.
+- The submission is sent to CRAN, including all checks. *New* warnings and
+  errors are marked for CRAN maintainers. They have the possibility to
+  accepts the submission, and then the source package moves to CRAN's
+  system. Otherwise CRAN maintainers can send back an email to the
+  package maintainer, including all build logs, and possibly their
+  human annotation.
+
+### CI for GitHub projects (weeks 14-15)
+
+An R specific CI service, with GitHub integration. It should be completely
+automatic, with some sane defaults, e.g. by default build and check
+with r-devel, on Linux (Debian), Windows and OSX.
+
+Repositories:
+
+- `rhub-ci` Web app that handles the hooks from GitHub (and possibly other
+  services in the future).
+
+### Open, documented API (week 16-17)
+
+Dcoument and make public the r-hub CI service, including an API to
+add/remove jobs, run/query builds. Stabilize services. Make sure that
+almost all CRAN packages build on all three major platforms.
+
+### Community website (weeks 18)
+
+Simple web-site, where users can browse and search packages, both
+in the r-hub reposotory and CRAN. It will be integrated into the already
+existing web pages.
+
+### Reverse dependency checks (week 19)
+
+We will include the check of reverse dependencies in CRAN pre-submissions.
+
+### Solaris builds (week 20)
+
+We will look into having Solaris slaves. This is really only important
+for packages with compiled code. It is also non-trivial, for two reasons.
+First, Jenkins does not officially support since late 2014. Second, ideally
+we would need Solaris sparc as well, as it has a different byte-order than
+all other CRAN platforms, and many errors only come up there.
+
 
 ## Costs
