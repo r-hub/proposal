@@ -93,12 +93,12 @@ statistics, link to GitHub issues.
 
 ### Build server: Jenkins in a container (week 1)
 
-Jenkins [1] server, running in a Docker container. We need one master
-server to start with. We will run it in the cloud, initially on
-DigitalOcean. We will use dokku [2] to manage it (and also other
+[Jenkins][jenkins] server, running in a Docker container. We need one
+master server to start with. We will run it in the cloud, initially on
+DigitalOcean. We will use [dokku][dokku] to manage it (and also other
 microservices in containers). We will probably switch to something more
-integrated in the futre, like Kubernetes [3] on CoreOS [4], but initially
-Dokku will be enough.
+integrated in the future, like Kubernetes [kubernetes] on CoreOS [coreos],
+but initially dokku will be enough.
 
 We will not expose Jenkins directly to the users, but both users and admins
 will access it through an HTTP API (the r-hub API). The reason for this is
@@ -108,8 +108,10 @@ in the future we might need multiple Jenkins servers.
 Initially the server provoding the r-hub API is very simple, and
 will serve as a proxy to Jenkins.
 
-[1] https://jenkins-ci.org__
-[2] https://github.com/progrium/dokku
+[jenkins]:    https://jenkins-ci.org
+[dokku]:      https://github.com/progrium/dokku
+[kubernetes]: https://github.com/googlecloudplatform/kubernetes
+[coreos]:     https://coreos.com/
 
 [3] https://github.com/googlecloudplatform/kubernetes
 
