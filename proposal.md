@@ -237,9 +237,14 @@ builder selection will be part of the r-hub API as well. At this point the
 user will have to select a single builder, I think. Multiple builders
 with a single submission will be added later.
 
+Alternatively, we can also run windows on AWS. If the Linux deployment
+will be on AWS, then it makes sense to use AWS workers for Windows as
+well.
+
 New repositories:
 
 * `rhub-backend-azure` The Azure backend.
+* `rhub-backend-aws-windows` AWS windows backend.
 
 [jenkins-azure]: https://github.com/jenkinsci/azure-slave-plugin
 [node-azure]: https://www.npmjs.com/package/azure
