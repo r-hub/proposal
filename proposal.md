@@ -62,7 +62,7 @@ potentially others:
 - Linux flavors
 - Solaris
 
-Users can upload their packages through a web page, or throught an HTTP
+Users can upload their packages through a web page, or an HTTP
 API, potentially select platforms to build on. They are provided with a
 randomized URL where they can check the status of their builds, see their
 output, and they can also cancel the build.
