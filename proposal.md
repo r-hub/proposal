@@ -344,6 +344,11 @@ with r-devel, on Linux (Debian), Windows and most recent OSX platform.
 Other, more exotic platforms can be selected via configuration, or
 as one-time builds from the web app or the API.
 
+Having a CI also means that we will have projects, and need a database
+to store their settings, build history, etc. We will use a MongoDB database
+for this, except for the build output, which will be compressed and stored
+in a key-value datastore, e.g. Redis or something more lightweight.
+
 Repository:
 
 - `rhub-ci` Web app that handles the hooks from GitHub (and possibly other
