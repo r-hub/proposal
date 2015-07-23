@@ -282,7 +282,7 @@ New repository:
 [node-azure]: https://www.npmjs.com/package/azure
 [r-appveyor]: https://github.com/krlmlr/r-appveyor
 
-### OSX slaves (weeks 10-11)
+### OSX workers (weeks 10-11)
 
 For legal reasons, OSX workers need to run on Apple hardware. Many
 companies offer OSX as IaaS, and this seems to be the simplest and cheapest
@@ -389,7 +389,7 @@ even if reverse dependencies break.
 
 ### Solaris builds (week 20)
 
-We will look into having Solaris slaves. This is really only important
+We will look into having Solaris workers. This is really only important
 for packages with compiled code. It is also non-trivial, for two reasons.
 First, Jenkins does not officially support since late 2014. Second, ideally
 we would need Solaris Sparc as well, as it has a different byte-order than
