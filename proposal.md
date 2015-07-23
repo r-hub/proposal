@@ -14,9 +14,9 @@ The infrastructure available for developing, building, testing, and
 validating R packages is of critical importance to the R community.  CRAN
 and R-Forge has traditionally met these needs, however the maintenance and
 enhancement of R-Forge has significant costs in both money and time.  This
-proposal outlines a service that is complementary to CRAN and R-Forge, that
-would add capabilities, improve extensibility, and create a platform for
-community contributions to r-hub itself.
+proposal outlines r-hub, a service that is complementary to CRAN and
+R-Forge, that would add capabilities, improve extensibility, and create a
+platform for community contributions to r-hub itself.
 
 ## Goals
 
@@ -29,8 +29,8 @@ community contributions to r-hub itself.
 
 ## Design principles
 
-1. Reuse as much as possible, especially the tools and services
-   already widely used among R package developers.
+1. Reuse as much existing technology as possible, especially the tools and
+   services already widely used among R package developers.
 2. Keep compatibility with current systems.
 3. Cover as much of the user base as possible.
 4. Create open systems: provide APIs, open source all code for the service,
@@ -72,9 +72,9 @@ output, and they can also cancel the build.
 Make the build server work as a continuous integration service, free to use
 for all R community members, integrated into GitHub and other popular
 source code repositories. It will work exactly the same way as Travis or
-other GitHub integrated CI services, but specialized for R packages: better
-startup time with using caching and binary builds of popular or all
-packages, no or minimal configuration for the users.
+other GitHub integrated CI services, but will specialize for R packages:
+better startup time using caching and binary builds of popular or all
+packages, no or minimal configuration requirements for the users.
 
 ### Distribution of R package sources and binaries
 
@@ -108,11 +108,6 @@ in the future we might need multiple Jenkins servers.
 Initially the server provoding the r-hub API is very simple, and
 will serve as a proxy to Jenkins.
 
-[jenkins]: https://jenkins-ci.org
-[dokku]: https://github.com/progrium/dokku
-[kubernetes]: https://github.com/googlecloudplatform/kubernetes
-[coreos]: https://coreos.com/
-
 The actual build submissions to Jenkins will be handled by another process,
 so that the web app can handle requests promptly. The web app simply puts
 down the file into a shared folder (putting the random Id in the
@@ -121,6 +116,11 @@ the filename and and the random build id to a RabbitMQ queue. Another
 process picks up jobs from the queue, and then communicates with Jenkins
 to add a job, and then start the build. Query parameters are also
 passed to the queue.
+
+[jenkins]: https://jenkins-ci.org
+[dokku]: https://github.com/progrium/dokku
+[kubernetes]: https://github.com/googlecloudplatform/kubernetes
+[coreos]: https://coreos.com/
 
 ### r-hub API (weeks 1-2)
 
@@ -159,18 +159,22 @@ submissions.
     Instruct Jenkins to create another worker. It's parameters are
     supplied in the body of the request, in JSON.
 
+- `DELETE /worker/<id>`
+
+    Remove a worker.
+
 ### Jenkins Linux workers (weeks 2-3), backends
 
 We will support different backends for workers. Initiallly there
 will be two backends: local, DigitalOcean or AWS.
 
 The local backend is for development and testing, it creates a
-worker on the local machine. DigitalOcean has an API to create a droplet
-with Docker support, AWS has an API as well.
+worker on the local machine. 
 
 The DigitalOcean/AWS worker is mainly for production (but can be used for
-testing). Jenkins has a Docker plugin that can create the container, once
-a Docker environment is set up.
+testing). DigitalOcean has an API to create a droplet with Docker support,
+AWS has an API as well.  Jenkins has a Docker plugin that can create the
+container, once a Docker environment is set up.
 
 Each platform needs to be able to install a recent version of
 R-devel (and R-patched). For the Linux workers, a permanent Jenkins job
@@ -244,7 +248,9 @@ after a 3-5 days period.
 Create a [sensu][sensu] dashboard and the required reporters, to
 oversee all services.
 
-Redundancy: to be worked out.
+Redundancy: workers are disposable, so we don't need to worry about them.
+The web app can be replicated on a second server and then load balanced
+using AWS services. The same applies to the queue manager.
 
 [sensu]: https://sensuapp.org/
 
@@ -256,29 +262,20 @@ New repositories:
 
 ### Windows workers (weeks 8-9)
 
-Jenkins also has an [Azure plugin][jenkins-azure]. We can maybe use that,
-if creating the workers through Jenkins is OK. More likely, we can just
-use a client library to create/destroy the workers, e.g. the
-[azure package][node-azure] from node.js
-
 Users will be able to select windows in the submission web app, and
 builder selection will be part of the r-hub API as well. At this point the
-user will have to select a single builder, I think. Multiple builders
-with a single submission will be added later.
+user will have to select a single builder. 
 
-Alternatively, we can also run windows on AWS. If the Linux deployment
-will be on AWS, then it makes sense to use AWS workers for Windows as
-well.
+We can also run windows VMs on AWS.
 
 For windows, a daily build of R-devel is available from r-project.org and
 the windows workers just download this.
 
-We will use code fromt the [r-appveyor][r-appveyor] project to build the
+We will use code from the [r-appveyor][r-appveyor] project to build the
 windows worker backend.
 
-New repositories:
+New repository:
 
-* `rhub-backend-azure` The Azure backend.
 * `rhub-backend-aws-windows` AWS windows backend.
 
 [jenkins-azure]: https://github.com/jenkinsci/azure-slave-plugin
@@ -289,8 +286,8 @@ New repositories:
 
 For legal reasons, OSX workers need to run on Apple hardware. Many
 companies offer OSX as IaaS, and this seems to be the simplest and cheapest
-solution for us. Most likely we will rent a Mac Mini server with 16GB
-memory from https://macstadium.com, unless we get a better offer. This
+solution for us. Most likely we will rent one or two Mac Mini servers with
+16GB memory from https://macstadium.com, unless we get a better offer. This
 server comes with a VMware ESXi v6.0 Hypervisor, so we run multiple
 instances of OSX on it, in virtual machines. We create snapshot images for
 the latest two or three OSX versions, and we start each R package build
@@ -317,10 +314,9 @@ sure that workers are not idle for long. For OSX at https://macstadium.com,
 flexible scaling is not available for the rented Mac Mini servers.
 For Linux and Windows workers, they are typically billed by the hour.
 We will work out a simple heuristics to shut down idle Windows and Linux
-workers. This could work from within Jenkins or the r-hub application,
-probably the latter, as we also want to remove the machines from Jenkins.
+workers. This could work from within Jenkins or the r-hub application.
 
-### CRAN presubmission (week 13)
+### CRAN presubmission (starting from week 13)
 
 Work with CRAN on the integration of r-hub into the CRAN submission
 process. At present, 80% of the CRAN submissions are turned down. We
@@ -338,24 +334,39 @@ The CRAN submission process will have the following steps:
   accepts the submission, and then the source package moves to CRAN's
   system. Otherwise CRAN maintainers can send back an email to the
   package maintainer, including all build logs, and possibly their
-  human annotation.
+  own annotation.
 
 ### CI for GitHub projects (weeks 14-15)
 
 An R specific CI service, with GitHub integration. It should be completely
 automatic, with some sane defaults, e.g. by default build and check
-with r-devel, on Linux (Debian), Windows and OSX.
+with r-devel, on Linux (Debian), Windows and most recent OSX platform.
+Other, more exotic platforms can be selected via configuration, or
+as one-time builds from the web app or the API.
 
-Repositories:
+Repository:
 
 - `rhub-ci` Web app that handles the hooks from GitHub (and possibly other
   services in the future).
 
+Binary and source packages from GitHub will be stored on a storage
+server in a CRAN-like repository, and we will open this repository for
+public use.
+
+Design a system to handle dependencies among packages stored at CRAN,
+r-hub, BioConductor, GitHub, etc. This should be part of the DESCRIPTION
+file, and handled by the r-hub CI automatically.
+
 ### Open, documented API (week 16-17)
 
-Dcoument and make public the r-hub CI service, including an API to
+Document and make public the r-hub CI service, including an API to
 add/remove jobs, run/query builds. Stabilize services. Make sure that
 almost all CRAN packages build on all three major platforms.
+
+Repository:
+
+- `rhub` R package, to query the r-hub API: submit packages to
+  build, search packages, etc.
 
 ### Community website (weeks 18)
 
@@ -366,14 +377,86 @@ existing web pages.
 ### Reverse dependency checks (week 19)
 
 We will include the check of reverse dependencies in CRAN pre-submissions.
+We compare the new check results to old ones, and include the differences
+(i.e. newly appearing warnings and errors), in our email notification to
+CRAN, if a package maintainer decides to continue with the submission,
+even if reverse dependencies break.
 
 ### Solaris builds (week 20)
 
 We will look into having Solaris slaves. This is really only important
 for packages with compiled code. It is also non-trivial, for two reasons.
 First, Jenkins does not officially support since late 2014. Second, ideally
-we would need Solaris sparc as well, as it has a different byte-order than
+we would need Solaris Sparc as well, as it has a different byte-order than
 all other CRAN platforms, and many errors only come up there.
 
+We can run Solaris x86 on AWS in a VM, and we can rent a Solaris Sparc in
+the cloud, and we can use Solaris Zones containers on it.
+
+### Stabilize, publicise r-hub (weeks 21-24)
+
+These four weeks also serve as reserves, if any of the subprojects
+run out of time, which is likely.
 
 ## Costs
+
+Some facts first, we base our cost estimtes on these:
+
+* There are about 7,000 packages on CRAN, and we estimate that this number
+  will double in five years, to about 14000 packages.
+* About 30 packages are updated on CRAN every day, we estimate that this
+  number will grow to 60 in the next five years.
+* A CRAN package has on average 2.65 hard (Depends, Imports) dependencies.
+* There are about 100,000 repositories on GitHub that are classified as
+  written mainly in R. Out of them about 2,000 are currently using Travis CI.
+* On a modern processor (e.g. Xeon 2.9GHz) it takes on average 30 seconds to
+  build and check a CRAN package on Linux, and about twice as long on OSX
+  and three to five times as long on Windows. These numbers assume that
+  binary packages are available, and no container startup time.
+
+Our estimates for the number of daily builds and required CPU time one year
+after the start of the project, assuming r-hub is integrated into the CRAN
+submission process and it is popular on GitHub as a CI service:
+
+* 35 successful CRAN submissions, and 200 unsuccessful ones, a total number
+  of 235 submissions, triggering 235 direct Linux builds on Debian, and
+  about 50 builds on other Linux flavours and other OSes. This also
+  triggers about 150 reverse dependency checks on the Debian Linux.
+* We estimate 1,000 CI builds from GitHub, although this number might be
+  highly inaccurate, as we have essentially no real data on this.
+  (The mean number of ~5 pushes per R GitHub repository is useless, as
+  most of these repositories are essentially inactive.) The 1,000 CI builds
+  will be done on Debian Linux, Windows and the most recent OSX platform.
+* This is a total of 1,385 builds on the primary Linux platform, 1,050
+  builds on the primary Windows and primary OSX platforms, and
+  50 builds on other platforms.
+* Assuming 2 minutes container startup time, this amounts to about 60 CPU
+  hours for the primary Linux platform, 50 CPU hours for the primary OSX
+  platform and 70 CPU hours for the primary windows platform. For other
+  platforms the required resource are negligible.
+
+These estimates are the lower bounds for running a useful service. They do
+not contain builds that are stuck and until the end of the build time limit
+(20-40 minutes), and they do not contain CPU time required to build R-devel
+daily, etc. We estimate that these are negligible compared to the total
+cost.
+
+Cost for development work:
+* $100 per hour, total of 1000 hours over 9-12 months. $100,000 total.
+
+Yearly costs:
+* Domain name registration, virus scanner for the Windows builder,
+  SSL certificates, maximum $500 total.
+
+Ongoing operational costs, from month one:
+* Development and production environments, Jenkins server and web
+  server hosting, all server side applications, about $100 per month.
+
+From month two to six:
+* Linux build servers: $100 per month, $10 per platform.
+* OSX build servers: one mac mini server $120 per month.
+* Windows servers: four t2.medium instances on AWS, $210 per month.
+* Solaris server: Solaris Sparc $300 per month, Solaris x86 $40 per month.
+* Storage server for binary and source packages: under $200 per month.
+
+Total monthly operational cost: $1112 per month.
