@@ -465,3 +465,33 @@ From month two to six:
 * Storage server for binary and source packages: under $200 per month.
 
 Total monthly operational cost: $1112 per month.
+
+## Future directions
+
+They may be prioritized to be included in the project if there is time
+available from the allocated 1000 hours, and the community needs them.
+
+### Builder
+
+- Build native binary packages for popular Linux distribution, e.g. Debian,
+  Ubuntu, RedHat Linux or CentOS.
+- Builds with memory sanitizers and debuggers: valgrind, UB-SAN, etc.
+- Digitally signed binaries, served over HTTPS.
+- R CI: since we build R-devel regularly anyway, we can also run tests
+  for it, and multi-platform continuous integration.
+- Separate r-hub-devel and r-hub-stable repositories.
+- Automatic vertical scaling of build workers. Keep track of how much
+  memory they need and use bigger machines only if needed.
+- Check CRAN packages with all allowed major R versions. E.g. if a package
+  depends on R (>= 3.0.0), then check it with R 3.0.3, 3.1.3, 3.2.1.
+
+### Community web site and r-hub web app
+
+- RSS feeds for new and updated packages, similarly to CRANberries, with
+  filters for keywords, dependencies, authors.
+- Searchable documentation of R packages, online in HTML, both for CRAN and
+  r-hub packages. With inline plots.
+- Explain R CMD check failures. Link to relevant parts of the
+  documentation.
+- Badges for package versions, number of installs, downloads, checks.
+- RSS or email notifications for CRAN check failures.
