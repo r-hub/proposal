@@ -1,12 +1,12 @@
 
-# r-hub: the everything-builder the R community needs
+# **r-hub**: the everything-builder the R community needs
 
 Gábor Csárdi, based on previous versions by J.J. Allaire (RStudio), Ben
 Bolker (McMaster University) Dirk Eddelbuettel (Debian), Jay Emerson (Yale
 University), Nicholas Lewin-Koh (Genentech), Joseph Rickert (Revolution),
 David Smith (Revolution), Murray Stokely (Google), and Simon Urbanek (AT&T)
 
-> July 21, 2015
+July 21, 2015
 
 ## Introduction
 
